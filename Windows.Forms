@@ -1,0 +1,114 @@
+
+$DebugPreference = "Continue"
+$ErrorActionPreference = "Continue"
+
+Function Blah { 
+
+#Enter Server Name   
+$Servername = ''            
+
+#Enter Database Name
+$DBName = ''                
+
+#Assigning whatever value inserted into the input boxes to these variables
+$input = $inputBox.text
+$input2 = $inputBox2.Text
+$input3 = $inputBox3.Text
+$collection_time = get-date  #Logging Purposes
+
+
+#Upon Clicking the Submit Button, This will generate a pop-up message box for Yes or No
+$Button_Click = [System.Windows.Forms.MessageBox]::Show('Submit Dates?','Pause Backsync','YesNo')
+
+#If clicking No, the Form will close and no records will be inserted into table
+if ($Button_Click -eq 'No'){        
+    $form.close()
+    return
+}
+else {                              
+    
+    #If Clicking the Yes button, the input text values will be inserted into the Database
+    Invoke-Sqlcmd -ServerInstance $Servername -Database $DBName  -Query "insert into BlahBlah (BeginDate, EndDate, UserID, Collection_Time) values ('$input', '$input2', '$input3', '$($collection_time)')"
+
+    #Message including the BeginDate and EndDate will display in the OutputBox
+    $OutputBox.text = "Blah will be paused for " + $input + " - " + $input2     
+
+    #After records are inserted into table, an email will be generated to responsible parties
+    Invoke-Sqlcmd -ServerInstance $Servername -Database $DBName -Query "exec Generation Email Procedure"
+    
+}
+
+
+}
+
+#Shell for the entire GUI
+Add-Type -AssemblyName system.Windows.Forms
+Add-Type -AssemblyName system.Drawing
+$Form = New-Object system.Windows.Forms.Form
+$Form.text = "Pause Blah"
+$Form.AutoScroll = $True
+$form.Size = New-Object System.Drawing.Size(600,400)
+
+
+#First Input TextBox
+$inputBox = New-Object system.windows.forms.textbox 
+$inputBox.Location = New-Object System.Drawing.Size(20,50)      #Location within the GUI
+$inputBox.Size = New-Object System.Drawing.Size(150,20)         #Size of the TextBox
+$Form.Controls.Add($inputBox)
+
+
+#Creating the Label for the first TextBox
+$label = New-Object system.windows.forms.label
+$label.Text = "Enter Begin Date"
+$Label.Location = New-Object System.Drawing.Size(20,30)         #Location within the GUI
+$Label.BackColor = "transparent"
+$Label.AutoSize = $true
+$Form.Controls.Add($Label)
+
+
+#Second Input TextBox
+$inputBox2 = New-Object system.windows.forms.textbox 
+$inputBox2.Location = New-Object System.Drawing.Size(210,50)    #Location within the GUI
+$inputBox2.Size = New-Object System.Drawing.Size(150,20)        #Size of the TextBox
+$Form.Controls.Add($inputBox2)
+
+#Creating the Label for the second TextBox
+$label2 = New-Object system.windows.forms.label
+$label2.Text = "Enter End Date"
+$Label2.Location = New-Object System.Drawing.Size(210,30)       #Location within the GUI
+$Label2.BackColor = "transparent"
+$Label2.AutoSize = $true
+$Form.Controls.Add($label2)
+
+#Third Input TextBox
+$inputBox3 = New-Object system.windows.forms.textbox 
+$inputBox3.Location = New-Object System.Drawing.Size(20,100)    #Location within the GUI
+$inputBox3.Size = New-Object System.Drawing.Size(150,20)        #Size of the TextBox
+$Form.Controls.Add($inputBox3)
+
+#Creating the label for the third TextBox
+$label3 = New-Object system.windows.forms.label
+$label3.Text = "Enter UserID"
+$label3.Location = New-Object System.Drawing.Size(20,80)        #Location within the GUI
+$label3.BackColor = "transparent"
+$label3.AutoSize = $true
+$Form.Controls.Add($label3)
+
+
+#Creating the Output box for confirmation message
+$outputBox = New-Object System.Windows.Forms.TextBox
+$outputBox.Location = New-Object System.Drawing.Size(10,150)    #Location within the GUI
+$outputBox.Size = New-Object System.Drawing.Size(565,200)       #Size of the TextBox
+$outputBox.MultiLine = $True
+$outputBox.font = "lucida console"
+$Form.Controls.Add($OutputBox)                                  #Variable defined will display within the OutputBox
+
+
+#Creating a Button to execute the process
+$Button = New-Object System.Windows.Forms.Button
+$Button.Location = New-Object System.Drawing.Size(400,30)       #Location within the GUI
+$Button.Size = New-Object System.Drawing.Size(110,80)           #Size of Button
+$Button.Text = "Submit Date for Blah Pause"                     #Button Label
+$Form.Controls.Add($Button)
+$Button.Add_Click({Blah})                                       #Executes function defined upon clicking the button
+$form.ShowDialog()                                              #Displays Form
